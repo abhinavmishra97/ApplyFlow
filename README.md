@@ -5,7 +5,7 @@
 ![Flask](https://img.shields.io/badge/Flask-3.0-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
-**ApplyFlow** is a professional, ethical job search automation tool that helps you send personalized cold emails to companies while maintaining strict rate limits and anti-spam measures.
+**ApplyFlow** is a professional, ethical job search automation tool that helps you send personalized cold emails to companies while maintaining strict rate limits and anti-spam measures..
 
 ## 🌟 Features
 
