@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - ApplyFlow{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Dashboard</h1>
+            <a href="{{ url_for('main.new_campaign') }}" class="btn btn-primary">
+                <span>+ New Campaign</span>
+            </a>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">📊</div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ stats.total_campaigns }}</div>
+                    <div class="stat-label">Total Campaigns</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">🚀</div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ stats.active_campaigns }}</div>
+                    <div class="stat-label">Active Campaigns</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">✅</div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ stats.total_sent }}</div>
+                    <div class="stat-label">Emails Sent</div>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">⏳</div>
+                <div class="stat-content">
+                    <div class="stat-value">{{ stats.total_pending }}</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="campaigns-section">
+            <h2>Your Campaigns</h2>
+
+            {% if campaigns %}
+            <div class="campaigns-list">
+                {% for campaign in campaigns %}
+                <div class="campaign-card">
+                    <div class="campaign-header">
+                        <h3>{{ campaign.name }}</h3>
+                        <span class="badge badge-{{ campaign.status }}">{{ campaign.status }}</span>
+                    </div>
+                    <div class="campaign-meta">
+                        <span>📅 Created: {{ campaign.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <span>📧 Companies: {{ campaign.companies|length }}</span>
+                    </div>
+                    <div class="campaign-actions">
+                        <a href="{{ url_for('main.campaign_detail', campaign_id=campaign.id) }}"
+                            class="btn btn-sm btn-secondary">View Details</a>
+                        {% if campaign.status == 'draft' or campaign.status == 'paused' %}
+                        <form method="POST" action="{{ url_for('main.start_campaign', campaign_id=campaign.id) }}"
+                            style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-success">Start</button>
+                        </form>
+                        {% elif campaign.status == 'active' %}
+                        <form method="POST" action="{{ url_for('main.pause_campaign', campaign_id=campaign.id) }}"
+                            style="display: inline;">
+                            <button type="submit" class="btn btn-sm btn-warning">Pause</button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>No campaigns yet</h3>
+                <p>Create your first campaign to start automating your job search!</p>
+                <a href="{{ url_for('main.new_campaign') }}" class="btn btn-primary">Create Campaign</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

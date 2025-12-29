@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}New Campaign - ApplyFlow{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Create New Campaign</h1>
+        <p>Upload your companies list and configure your email campaign</p>
+    </div>
+
+    <div class="form-card">
+        <form method="POST" enctype="multipart/form-data" class="campaign-form">
+            {{ form.hidden_tag() }}
+
+            <div class="form-section">
+                <h3>Campaign Details</h3>
+
+                <div class="form-group">
+                    {{ form.name.label(class="form-label") }}
+                    {{ form.name(class="form-input", placeholder="e.g., Software Engineer Applications - Jan 2025") }}
+                    {% if form.name.errors %}
+                    <div class="form-error">{{ form.name.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Upload Files</h3>
+
+                <div class="form-group">
+                    {{ form.companies_file.label(class="form-label") }}
+                    <div class="file-upload-wrapper">
+                        {{ form.companies_file(class="form-file", accept=".csv,.xlsx,.xls") }}
+                        <div class="file-upload-hint">
+                            Expected columns: company_name, email (required), name, role, designation (optional)
+                        </div>
+                    </div>
+                    {% if form.companies_file.errors %}
+                    <div class="form-error">{{ form.companies_file.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    {{ form.resume.label(class="form-label") }}
+                    <div class="file-upload-wrapper">
+                        {{ form.resume(class="form-file", accept=".pdf") }}
+                        <div class="file-upload-hint">Optional: Attach your resume to emails</div>
+                    </div>
+                    {% if form.resume.errors %}
+                    <div class="form-error">{{ form.resume.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Email Template</h3>
+
+                <div class="form-group">
+                    {{ form.email_template.label(class="form-label") }}
+                    {{ form.email_template(class="form-textarea", rows="12") }}
+                    <div class="file-upload-hint">
+                        Available placeholders: {company_name}, {recipient_name}, {role}, {designation}
+                    </div>
+                    {% if form.email_template.errors %}
+                    <div class="form-error">{{ form.email_template.errors[0] }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Schedule</h3>
+
+                <div class="form-group">
+                    {{ form.schedule_type.label(class="form-label") }}
+                    {{ form.schedule_type(class="form-select") }}
+                    {% if form.schedule_type.errors %}
+                    <div class="form-error">{{ form.schedule_type.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group" id="scheduled-time-group" style="display: none;">
+                    {{ form.scheduled_time.label(class="form-label") }}
+                    {{ form.scheduled_time(class="form-input") }}
+                    {% if form.scheduled_time.errors %}
+                    <div class="form-error">{{ form.scheduled_time.errors[0] }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="info-box">
+                    <strong>⚠️ Ethical Rate Limits:</strong>
+                    <ul>
+                        <li>Maximum 4 emails per hour</li>
+                        <li>Maximum 25 emails per day</li>
+                        <li>Random delays (60-300 seconds) between emails</li>
+                        <li>One email per company only</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Cancel</a>
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const scheduleType = document.getElementById('schedule_type');
+        const scheduledTimeGroup = document.getElementById('scheduled-time-group');
+
+        function toggleScheduledTime() {
+            if (scheduleType.value === 'scheduled') {
+                scheduledTimeGroup.style.display = 'block';
+            } else {
+                scheduledTimeGroup.style.display = 'none';
+            }
+        }
+
+        scheduleType.addEventListener('change', toggleScheduledTime);
+        toggleScheduledTime();
+    });
+</script>
+{% endblock %}

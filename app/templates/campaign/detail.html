@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ campaign.name }} - ApplyFlow{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <div>
+            <h1>{{ campaign.name }}</h1>
+            <span class="badge badge-{{ campaign.status }} badge-lg">{{ campaign.status }}</span>
+        </div>
+        <div class="page-actions">
+            {% if campaign.status == 'draft' or campaign.status == 'paused' %}
+            <form method="POST" action="{{ url_for('main.start_campaign', campaign_id=campaign.id) }}"
+                style="display: inline;">
+                <button type="submit" class="btn btn-success">Start Campaign</button>
+            </form>
+            {% elif campaign.status == 'active' %}
+            <form method="POST" action="{{ url_for('main.pause_campaign', campaign_id=campaign.id) }}"
+                style="display: inline;">
+                <button type="submit" class="btn btn-warning">Pause Campaign</button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">📊</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.total }}</div>
+                <div class="stat-label">Total Emails</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">✅</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.sent }}</div>
+                <div class="stat-label">Sent</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">⏳</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.pending }}</div>
+                <div class="stat-label">Pending</div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-icon" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">❌</div>
+            <div class="stat-content">
+                <div class="stat-value">{{ stats.failed }}</div>
+                <div class="stat-label">Failed</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="email-logs-section">
+        <h2>Email Logs</h2>
+
+        {% if email_logs %}
+        <div class="table-wrapper">
+            <table class="email-logs-table">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Recipient</th>
+                        <th>Status</th>
+                        <th>Sent At</th>
+                        <th>Error</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log, company in email_logs %}
+                    <tr>
+                        <td>{{ company.company_name }}</td>
+                        <td>{{ company.recipient_email }}</td>
+                        <td>
+                            <span class="badge badge-{{ log.status }}">{{ log.status }}</span>
+                        </td>
+                        <td>
+                            {% if log.sent_at %}
+                            {{ log.sent_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td class="error-cell">
+                            {% if log.error_message %}
+                            <span class="error-message" title="{{ log.error_message }}">
+                                {{ log.error_message[:50] }}{% if log.error_message|length > 50 %}...{% endif %}
+                            </span>
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <h3>No emails yet</h3>
+            <p>Start the campaign to begin sending emails.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% if campaign.status == 'active' %}
+<script>
+    // Auto-refresh status every 10 seconds if campaign is active
+    setInterval(function () {
+        fetch('{{ url_for("main.campaign_status_api", campaign_id=campaign.id) }}')
+            .then(response => response.json())
+            .then(data => {
+                // Update stats
+                document.querySelectorAll('.stat-value')[0].textContent = data.total;
+                document.querySelectorAll('.stat-value')[1].textContent = data.sent;
+                document.querySelectorAll('.stat-value')[2].textContent = data.pending;
+                document.querySelectorAll('.stat-value')[3].textContent = data.failed;
+
+                // Reload page if status changed
+                if (data.status !== '{{ campaign.status }}') {
+                    location.reload();
+                }
+            });
+    }, 10000);
+</script>
+{% endif %}
+{% endblock %}
